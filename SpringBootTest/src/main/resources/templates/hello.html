@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link href="/css/index.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/bootstrap-theme.min.css"/>
+    <script src="/js/jquery-1.12.3.min.js"></script>
+    <script src="/js/bootstrap.js"></script>
+</head>
+<body>
+<div class="container">
+    <h2 th:text="${msg}"></h2>
+    <h2 th:text="${msg}"></h2>
+    <h2 th:text="${msg}"></h2>
+    <button onclick="aa">添加</button>
+    <button>删除</button>
+</div>
+<script type="text/javascript">
+    $(function() {
+        function aa(e){
+            var aa = {name:"老宋",address:"邯郸",age:15};
+            $.ajax({
+            url: "localhost:8080/thymeleaf/person/5",
+            type:delete,
+            data:aa,
+            context: document.body,
+             success: function(){
+                alert("添加成功");
+              }});
+        }
+    })
+
+
+
+</script>
+</body>
+</html>
