@@ -1,6 +1,7 @@
 package com.by.test.Controller;
 
 import com.by.test.entity.Person;
+import com.by.test.sender.HelloSender;
 import com.by.test.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -18,6 +19,9 @@ public class ThymeleafController {
     @Autowired
     private PersonService personService;
 
+    @Autowired
+    private HelloSender helloSender;
+
     @RequestMapping("hello")
     public String hello(Map<String,Object> map) {
         map.put("msg", "Hello Thymeleaf");
@@ -32,7 +36,9 @@ public class ThymeleafController {
     @RequestMapping(value = "person",method = RequestMethod.POST)
     @ResponseBody
     public int add(@ModelAttribute("person") Person person){
-        return personService.add(person);
+
+        helloSender.send();
+        return 0;
     }
 
     @RequestMapping(value = "person/{id}",method = RequestMethod.DELETE)

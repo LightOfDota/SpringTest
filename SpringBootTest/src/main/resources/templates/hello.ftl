@@ -26,11 +26,7 @@
                 alert("添加成功");
               }});
         }
-        function delete(e){
-            $.ajax({
-                url:"http://localhost:8080/thymeleaf/person"
-            })
-        }
+
         $('#send').bind('click', function() {
             add();
         });

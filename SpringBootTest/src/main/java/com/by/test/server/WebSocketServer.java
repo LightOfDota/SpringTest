@@ -2,6 +2,7 @@ package com.by.test.server;
 
 import com.alibaba.fastjson.JSONObject;
 import com.by.test.entity.Person;
+import com.rabbitmq.client.*;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpSession;
@@ -13,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by root on 2018/3/5.
@@ -42,7 +44,53 @@ public class WebSocketServer {
         this.session = session;
         connections.add(this);
         String message = String.format("* %s %s", nickname, "加入聊天！");
+
         broadcast(message,0);
+        String QUEUE_NAME = "hello1";
+        try {
+            //打开连接和创建频道，与发送端一样
+            ConnectionFactory factory = new ConnectionFactory();
+            //设置MabbitMQ所在主机ip或者主机名
+            factory.setHost("127.0.0.1");
+            Connection connection = factory.newConnection();
+            Channel channel = connection.createChannel();
+            //声明队列，主要为了防止消息接收者先运行此程序，队列还不存在时创建队列。
+            AMQP.Queue.DeclareOk declareOk = channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+            System.out.println("Waiting for messages. To exit press CTRL+C");
+
+//            DefaultConsumer defaultConsumer = new DefaultConsumer(channel) {
+//                @Override
+//                public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+//                    System.out.println(consumerTag);
+//                    System.out.println(envelope.toString());
+//                    System.out.println(properties.toString());
+//                    System.out.println("消息内容:" + new String(body));
+//                    broadcast(new String(body), 0);
+//                    try {
+//                        TimeUnit.MILLISECONDS.sleep(1);
+//                    } catch (InterruptedException e) {
+//                    }
+//                }
+//            };
+//            channel.basicConsume(declareOk.getQueue(), true, "RGP订单系统ADD处理逻辑消费者",defaultConsumer);
+
+            //创建队列消费者
+            QueueingConsumer consumer = new QueueingConsumer(channel);
+            //指定消费队列
+            channel.basicConsume(QUEUE_NAME, true, consumer);
+
+            while (true) {
+                //nextDelivery是一个阻塞方法（内部实现其实是阻塞队列的take方法）
+                QueueingConsumer.Delivery delivery = consumer.nextDelivery();
+                String aa = new String(delivery.getBody());
+
+                System.out.println("Received '" + message + "'");
+
+                broadcast(aa,0);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     @OnClose
