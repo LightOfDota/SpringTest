@@ -42,18 +42,18 @@ public class WebConfig {
 
     }
 
-    @Bean
-    public FilterRegistrationBean timeFillter(){
-        FilterRegistrationBean frb = new FilterRegistrationBean();
-        TimeFilter tf = new TimeFilter();
-        frb.setFilter(tf);
-
-        List<String> urls = new ArrayList<>();
-        urls.add("/*");
-        frb.setUrlPatterns(urls);
-
-        return frb;
-    }
+//    @Bean
+//    public FilterRegistrationBean timeFillter(){
+//        FilterRegistrationBean frb = new FilterRegistrationBean();
+//        TimeFilter tf = new TimeFilter();
+//        frb.setFilter(tf);
+//
+//        List<String> urls = new ArrayList<>();
+//        urls.add("/*");
+//        frb.setUrlPatterns(urls);
+//
+//        return frb;
+//    }
 
     @Bean
     public ServletListenerRegistrationBean<ListenerTest> servletListenerRegistrationBean() {

@@ -40,14 +40,9 @@
         </div>
         <div class="input-group">
             <input id="userName" type="text" class="form-control" name="userName" placeholder="输入您的用户名" />
+            <input id="userLevel" type="text" class="form-control" name="userLevel" placeholder="输入您的级别" />
             <button class="btn btn-default" type="button" id="connection-btn">建立连接</button>
         </div>
-        <input type="text" class="form-control" placeholder="发送信息..." name="st" value="aa">
-        <input type="text" class="form-control" placeholder="发送信息..." name="st" value="bb">
-        <input type="text" class="form-control" placeholder="发送信息..." name="st" value="cc">
-        <input type="text" class="form-control" placeholder="发送信息..." name="st" value="dd">
-        <input type="text" class="form-control" placeholder="发送信息..." name="st" value="ee">
-        <input type="text" class="form-control" placeholder="发送信息..." name="st" value="ff">
         <!-- /input-group -->
     </div>
     <!-- /.col-lg-6 -->
@@ -56,9 +51,6 @@
 </div>
 <script type="text/javascript">
     $(function() {
-        $('input[name="st"]').each(function () {
-            $(this)[0].value;
-        })
         var websocket;
         $("#connection-btn").bind("click", function() {
             var userName = $("#userName").val();
@@ -66,17 +58,22 @@
                 alert("请输入您的用户名");
                 return;
             }
-            connection(userName);
+            var userLevel = $("#userLevel").val();
+            if (userLevel == null || userLevel == "") {
+                alert("请输入您的级别");
+                return;
+            }
+            connection(userName,userLevel);
         });
 
-        function connection(userName) {
+        function connection(userName,userLevel) {
             var host = window.location.host;
             if ('WebSocket' in window) {
                 websocket = new WebSocket("ws://" + host +
-                    "/webSocketServer/" + userName);
+                    "/webSocketServer/"+userName+"/"+userLevel);
             } else if ('MozWebSocket' in window) {
                 websocket = new MozWebSocket("ws://" + host +
-                    "/webSocketServer/" + userName);
+                    "/webSocketServer/"+userName+"/"+userLevel);
             }
             websocket.onopen = function(evnt) {
                 $("#tou").html("链接服务器成功!")
@@ -105,7 +102,9 @@
                 if (data == null || data == "") {
                     return;
                 }
-                websocket.send(data);
+                var aa = {message:"老宋",level:"2"};
+                //websocket.send(data);
+                websocket.send(JSON.stringify(aa));
                 $message.val("");
             } else {
                 alert('未与服务器链接.');

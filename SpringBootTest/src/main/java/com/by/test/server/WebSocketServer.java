@@ -1,8 +1,10 @@
 package com.by.test.server;
 
+import com.alibaba.fastjson.JSONObject;
 import com.by.test.entity.Person;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpSession;
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
@@ -15,14 +17,16 @@ import java.util.concurrent.CopyOnWriteArraySet;
 /**
  * Created by root on 2018/3/5.
  */
-@ServerEndpoint(value = "/webSocketServer/{userName}")
+@ServerEndpoint(value = "/webSocketServer/{userName}/{userLevel}", configurator = GetHttpSessionConfigurator.class)
 @Component
 public class WebSocketServer {
 
     private static final Set<WebSocketServer> connections = new CopyOnWriteArraySet<>();
 
     private String nickname;
+    private Integer level;
     private Session session;
+    private static HttpSession httpSession;
 
     private static String getDatetime(Date date) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -30,24 +34,28 @@ public class WebSocketServer {
     }
 
     @OnOpen
-    public void start(@PathParam("userName") String userName, Session session) {
+    public void start(@PathParam("userName") String userName,@PathParam("userLevel") Integer userLevel,Session session, EndpointConfig config) {
+        httpSession = (HttpSession) config.getUserProperties().get(
+                HttpSession.class.getName());
         this.nickname = userName;
+        this.level = userLevel;
         this.session = session;
         connections.add(this);
         String message = String.format("* %s %s", nickname, "加入聊天！");
-        broadcast(message);
+        broadcast(message,0);
     }
 
     @OnClose
     public void end() {
         connections.remove(this);
         String message = String.format("* %s %s", nickname, "退出聊天！");
-        broadcast(message);
+        broadcast(message,0);
     }
 
     @OnMessage
     public void pushMsg(String message) {
-        broadcast("【" + this.nickname + "】" + getDatetime(new Date()) + " : " + message);
+        JSONObject jsonObject = JSONObject.parseObject(message);
+        broadcast(jsonObject.getString("message"),jsonObject.getInteger("level"));
     }
 
     @OnError
@@ -55,9 +63,12 @@ public class WebSocketServer {
 
     }
 
-    private static void broadcast(String msg) {
+    private static void broadcast(String msg,Integer messageLevel) {
         // 广播形式发送消息
         for (WebSocketServer client : connections) {
+            if(messageLevel != 0 && messageLevel != client.level){
+                continue;
+            }
             try {
                 synchronized (client) {
                     client.session.getBasicRemote().sendText(msg);
@@ -70,7 +81,7 @@ public class WebSocketServer {
                     e.printStackTrace();
                 }
                 String message = String.format("* %s %s", client.nickname, "断开连接");
-                broadcast(message);
+                broadcast(message,0);
             }
         }
     }
