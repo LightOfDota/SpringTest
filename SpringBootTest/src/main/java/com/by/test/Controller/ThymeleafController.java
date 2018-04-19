@@ -2,12 +2,14 @@ package com.by.test.Controller;
 
 import com.by.test.entity.Person;
 import com.by.test.sender.HelloSender;
+import com.by.test.server.WebSocketServer;
 import com.by.test.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by root on 2018/3/5.
@@ -37,8 +39,9 @@ public class ThymeleafController {
     @ResponseBody
     public int add(@ModelAttribute("person") Person person){
 
-        helloSender.send();
-        return 0;
+//        helloSender.send();
+        final Set<WebSocketServer> allConn = WebSocketServer.getAllConn();
+        return allConn.size();
     }
 
     @RequestMapping(value = "person/{id}",method = RequestMethod.DELETE)
